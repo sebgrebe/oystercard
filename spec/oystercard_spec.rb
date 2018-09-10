@@ -40,4 +40,22 @@ describe Oystercard do
       expect{subject.add_money(1)}.to raise_error("Maximum balance of #{maximum_balance} exceeded")
     end
   end
+
+  # In order to pay for my journey
+  # As a customer
+  # I need my fare deducted from my card
+
+  describe '#deduct_money' do
+
+    it 'responds to deduct money' do
+      expect(subject).to respond_to :deduct_money
+    end
+
+    # it 'deducts money from card'
+    #   subject.balance = 30
+    #   expect{subject.deduct_money(9)}.to change{subject.balance}.from(30).to(21)
+    # end
+
+  end
+
 end
