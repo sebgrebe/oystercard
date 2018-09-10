@@ -9,9 +9,13 @@ class Oystercard
   end
 
   def add_money(amount)
-    # test_bal = @balance + amount
+
     fail("Maximum balance of #{MAXIMUM_VALUE} exceeded") if amount + balance > MAXIMUM_VALUE
     @balance += amount
+
   end
 
+  def deduct_money(amount)
+    @balance -= amount
+  end
 end

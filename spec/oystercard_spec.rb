@@ -45,17 +45,13 @@ describe Oystercard do
   # As a customer
   # I need my fare deducted from my card
 
-  describe '#deduct_money' do
+    it { is_expected.to respond_to(:deduct_money).with(1).argument }
 
-    it 'responds to deduct money' do
-      expect(subject).to respond_to :deduct_money
+    it 'deducts money from card' do
+      subject.add_money(30)
+      expect{subject.deduct_money(9)}.to change {subject.balance}.by -9
+      # expect{subject.deduct_money(9)}.to change{subject.balance}.from(30).to(21)
     end
 
-    # it 'deducts money from card'
-    #   subject.balance = 30
-    #   expect{subject.deduct_money(9)}.to change{subject.balance}.from(30).to(21)
-    # end
-
-  end
 
 end
