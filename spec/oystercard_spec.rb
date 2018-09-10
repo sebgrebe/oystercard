@@ -28,6 +28,14 @@ describe Oystercard do
       expect{subject.add_money(30)}.to change{subject.balance}.from(0).to(30)
     end
 
-  end
+  
 
+  # In order to protect my money from theft or loss
+  # As a customer
+  # I want a maximum limit (of £90) on my card
+
+    it 'expect error to be raised if top_up amount takes "balance" over 90' do
+      expect{subject.add_money(100)}.to raise_error('£90 limit exceeded')
+    end
+  end
 end
