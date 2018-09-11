@@ -2,21 +2,31 @@ require 'oystercard'
 
 describe Oystercard do
 
-  # In order to use public transport
-  # As a customer
-  # I want money on my card
+  # it { is_expected.to respond_to(:deduct_money).with(1).argument }
+
+  let(:station){double(:station)}
+  let(:exit_station){double(:exit_station)}
+  it { is_expected.to respond_to(:touch_in).with(1).argument }
 
   it 'responds to balance' do
     expect(subject).to respond_to :balance
   end
+  it 'is initially not in a journey' do
+    expect(subject).not_to be_in_journey
+  end
+
+  it 'responds to journeys' do
+    expect(subject).to respond_to :journeys
+  end
+
+  it "has an empty list of journeys by default" do
+    expect(subject.journeys).to be_empty
+  end
+
 
   it 'expect oystercard to have default starting value of "0"' do
     expect(subject.balance).to eq(0)
   end
-
-  # In order to keep using public transport
-  # As a customer
-  # I want to add money to my card
 
   describe '#add_money' do
 
@@ -29,11 +39,6 @@ describe Oystercard do
     end
 
 
-
-  # In order to protect my money from theft or loss
-  # As a customer
-  # I want a maximum limit (of £90) on my card
-
     it 'expect error to be raised if top_up amount takes "balance" over 90' do
       maximum_balance = Oystercard::MAXIMUM_VALUE
       subject.add_money(maximum_balance)
@@ -41,35 +46,64 @@ describe Oystercard do
     end
   end
 
-  # In order to pay for my journey
-  # As a customer
-  # I need my fare deducted from my card
+  # describe "#deduct_money" do
+  #
+  #
+  #   it 'deducts money from card' do
+  #     subject.add_money(30)
+  #     expect{subject.deduct_money(9)}.to change {subject.balance}.by -9
+  #
+  #     expect{subject.deduct_money(9)}.to change{subject.balance}.from(30).to(21)
+  #   end
+  # end
 
-    it { is_expected.to respond_to(:deduct_money).with(1).argument }
 
-    it 'deducts money from card' do
-      subject.add_money(30)
-      expect{subject.deduct_money(9)}.to change {subject.balance}.by -9
-      # expect{subject.deduct_money(9)}.to change{subject.balance}.from(30).to(21)
-    end
-
-    # In order to get through the barriers.
-    # As a customer
-    # I need to touch in and out.
-
-    it 'is initially not in a journey' do
-      expect(subject).not_to be_in_journey
-    end
+  describe "#touch_in" do
 
     it 'can touch in' do
-      subject.touch_in
+      subject.add_money(10)
+      subject.touch_in(station)
       expect(subject).to be_in_journey
     end
 
+    it 'touch in raises error if below min balance' do
+      expect { subject.touch_in(station) }.to raise_error("not enough funds")
+    end
+
+  end
+
+  describe "#touch_out" do
+
     it 'can touch out' do
-      subject.touch_in
-      subject.touch_out
+      subject.add_money(10)
+      subject.touch_in(station)
+      subject.touch_out(exit_station)
       expect(subject).not_to be_in_journey
     end
+
+    it "charges card on touch_out" do
+      subject.add_money(10)
+      subject.touch_in(station)
+      expect{subject.touch_out(exit_station)}.to change{subject.balance}.by(-described_class::MINIMUM_FARE)
+    end
+
+    it 'makes entry station change to nil' do
+      subject.add_money(10)
+      subject.touch_in(station)
+      subject.touch_out(exit_station)
+      expect(subject.station).to eq nil
+    end
+
+    it 'records journey details' do
+      subject.add_money(10)
+      subject.touch_in(station)
+      subject.touch_out(exit_station)
+      expect(subject.journeys).to eq([{
+        entry_station: station,
+        exit_station: exit_station
+        }])
+    end
+
+  end
 
 end

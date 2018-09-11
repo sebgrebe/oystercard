@@ -7,3 +7,6 @@ oyster.touch_in
 oyster.in_journey?
 oyster.touch_out
 oyster.in_journey?
+
+#oyster.entry_station
+oyster.journeys
