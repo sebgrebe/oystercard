@@ -53,5 +53,23 @@ describe Oystercard do
       # expect{subject.deduct_money(9)}.to change{subject.balance}.from(30).to(21)
     end
 
+    # In order to get through the barriers.
+    # As a customer
+    # I need to touch in and out.
+
+    it 'is initially not in a journey' do
+      expect(subject).not_to be_in_journey
+    end
+
+    it 'can touch in' do
+      subject.touch_in
+      expect(subject).to be_in_journey
+    end
+
+    it 'can touch out' do
+      subject.touch_in
+      subject.touch_out
+      expect(subject).not_to be_in_journey
+    end
 
 end
