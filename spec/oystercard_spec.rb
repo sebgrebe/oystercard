@@ -6,6 +6,11 @@ describe Oystercard do
 
   let(:station){double(:station)}
   let(:exit_station){double(:exit_station)}
+  before(:each) {
+    @oyster_10 = Oystercard.new
+    @oyster_10.add_money(10)
+  }
+
   it { is_expected.to respond_to(:touch_in).with(1).argument }
 
   it 'responds to balance' do
@@ -61,9 +66,8 @@ describe Oystercard do
   describe "#touch_in" do
 
     it 'can touch in' do
-      subject.add_money(10)
-      subject.touch_in(station)
-      expect(subject).to be_in_journey
+      @oyster_10.touch_in(station)
+      expect(@oyster_10).to be_in_journey
     end
 
     it 'touch in raises error if below min balance' do
@@ -75,32 +79,22 @@ describe Oystercard do
   describe "#touch_out" do
 
     it 'can touch out' do
-      subject.add_money(10)
-      subject.touch_in(station)
-      subject.touch_out(exit_station)
-      expect(subject).not_to be_in_journey
+      @oyster_10.touch_in(station)
+      @oyster_10.touch_out(exit_station)
+      expect(@oyster_10).not_to be_in_journey
     end
 
     it "charges card on touch_out" do
-      subject.add_money(10)
-      subject.touch_in(station)
-      expect{subject.touch_out(exit_station)}.to change{subject.balance}.by(-described_class::MINIMUM_FARE)
-    end
-
-    it 'makes entry station change to nil' do
-      subject.add_money(10)
-      subject.touch_in(station)
-      subject.touch_out(exit_station)
-      expect(subject.station).to eq nil
+      @oyster_10.touch_in(station)
+      expect{@oyster_10.touch_out(exit_station)}.to change{@oyster_10.balance}.by(-described_class::MINIMUM_FARE)
     end
 
     it 'records journey details' do
-      subject.add_money(10)
-      subject.touch_in(station)
-      subject.touch_out(exit_station)
-      expect(subject.journeys).to eq([{
-        entry_station: station,
-        exit_station: exit_station
+      @oyster_10.touch_in(station)
+      @oyster_10.touch_out(exit_station)
+      expect(@oyster_10.journeys).to eq([{
+        in: station,
+        out: exit_station
         }])
     end
 

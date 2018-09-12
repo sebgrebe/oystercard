@@ -1,3 +1,5 @@
+require_relative 'station'
+
 class Oystercard
 
   attr_reader :balance, :station, :journeys
@@ -7,7 +9,7 @@ class Oystercard
 
   def initialize
     @balance = 0
-    @station = nil
+    @in_journey = false
     @journeys = []
   end
 
@@ -20,19 +22,18 @@ class Oystercard
 
   def touch_in(station)
     raise "not enough funds" if @balance < MINIMUM_FARE
-    @station = station
-    @journeys << {entry_station: station}
+    @journeys << {in: station}
+    @in_journey = true
   end
 
   def in_journey?
-    @station
+    @in_journey
   end
 
   def touch_out(exit_station)
-    @journeys[-1][:exit_station] = exit_station
-    @station = nil
+    @journeys[-1][:out] = exit_station
     deduct_money(MINIMUM_FARE)
-
+    @in_journey = false
   end
 
   private
