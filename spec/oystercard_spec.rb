@@ -16,9 +16,6 @@ describe Oystercard do
   it 'responds to balance' do
     expect(subject).to respond_to :balance
   end
-  it 'is initially not in a journey' do
-    expect(subject).not_to be_in_journey
-  end
 
   it 'responds to journeys' do
     expect(subject).to respond_to :journeys
@@ -27,7 +24,6 @@ describe Oystercard do
   it "has an empty list of journeys by default" do
     expect(subject.journeys).to be_empty
   end
-
 
   it 'expect oystercard to have default starting value of "0"' do
     expect(subject.balance).to eq(0)
@@ -67,35 +63,38 @@ describe Oystercard do
 
     it 'can touch in' do
       @oyster_10.touch_in(station)
-      expect(@oyster_10).to be_in_journey
+      expect(@oyster_10.journeys[-1].complete?).to eq(false)
     end
 
     it 'touch in raises error if below min balance' do
       expect { subject.touch_in(station) }.to raise_error("not enough funds")
     end
 
+    it 'creates an instance of journey and stores it in "journeys"' do
+      @oyster_10.touch_in(station)
+      expect(@oyster_10.journeys[-1].from).to eq station
+    end
+
   end
 
   describe "#touch_out" do
 
-    it 'can touch out' do
+    before(:each) {
       @oyster_10.touch_in(station)
+    }
+
+    it 'can touch out' do
       @oyster_10.touch_out(exit_station)
-      expect(@oyster_10).not_to be_in_journey
+      expect(@oyster_10.journeys[-1].complete?).to eq(true)
     end
 
     it "charges card on touch_out" do
-      @oyster_10.touch_in(station)
       expect{@oyster_10.touch_out(exit_station)}.to change{@oyster_10.balance}.by(-described_class::MINIMUM_FARE)
     end
 
-    it 'records journey details' do
-      @oyster_10.touch_in(station)
+    it 'adds exit station as "to" in journey instance' do
       @oyster_10.touch_out(exit_station)
-      expect(@oyster_10.journeys).to eq([{
-        in: station,
-        out: exit_station
-        }])
+      expect(@oyster_10.journeys[-1].to).to eq exit_station
     end
 
   end

@@ -34,3 +34,30 @@ in irb
   station = Station.new('Farringdon', 1)
   station.name == 'Farringdon'
   station.zone == 1
+
+In order to be charged correctly
+As a customer
+I need a penalty charge deducted if I fail to touch in or out
+
+in irb
+  require './lib/oystercard.rb'
+  oyster = Oystercard.new
+  oyster.add_money(23)
+  oyster.touch_in('station')
+  oyster.touch_in('station')
+  oyster.balance == 23 - 3
+
+  journey = Journey.new
+  journey.fare
+
+15
+in irb
+  journey_class = Journey
+  journeyLog = JourneyLog.new(journey_class)
+  journeyLog.start(station)
+  current_journey = journeyLog.current_journey
+  current_journey.from == station
+  journeyLog.finish(station2)
+  current_journey = journeyLog.current_journey
+  current_journey.to == station2
+  journeyLog.journeys = []
