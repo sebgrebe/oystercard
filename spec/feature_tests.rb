@@ -34,3 +34,31 @@ in irb
   station = Station.new('Farringdon', 1)
   station.name == 'Farringdon'
   station.zone == 1
+
+
+
+In order to be charged correctly
+As a customer
+I need a penalty charge deducted if I fail to touch in or out
+
+in irb
+    load './lib/oystercard.rb'
+    oyster = Oystercard.new
+    oyster.add_money(20)
+    station = Station.new('Farringdon', 1)
+    station2 = Station.new('Old Street', 1)
+
+    #touch in, but not out
+    oyster.touch_in(station)
+    oyster.touch_in(station)
+    oyster.balance == 20 - Oystercard::PENALTY_FARE
+
+    #jouyrney complete
+    oyster.touch_out(station2)
+    oyster.journeys[1].complete? == true
+
+    #touch out, but not in
+    oyster = Oystercard.new
+    oyster.add_money(20)
+    oyster.touch_out(station2)
+    oyster.balance == 20 - Oystercard::PENALTY_FARE
