@@ -75,6 +75,12 @@ describe Oystercard do
       expect(@oyster_10.journeys[-1].from).to eq station
     end
 
+    it 'deducts penalty if you had not touched out' do
+      @oyster_10.touch_in(station)
+      @oyster_10.touch_in(station)
+      expect(@oyster_10.balance).to eq 10-described_class::PENALTY_FARE
+    end
+
   end
 
   describe "#touch_out" do
