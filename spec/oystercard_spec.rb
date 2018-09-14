@@ -7,10 +7,13 @@ describe Oystercard do
 
   let(:entry_station){double(:entry_station)}
   let(:exit_station){double(:exit_station)}
-  let(:journey) {double(:journey)}
+  let(:journey_double_no_entry) { double :journey_double_no_entry, entry: nil}
+  let(:journey_double_with_exit) { double :journey_double_with_exit, entry: entry_station, exit: exit_station, fare: Journey::MINIMUM_FARE}
+  let(:journey_double_with_entry) { double :journey_double_with_entry, entry: entry_station, finish: journey_double_with_exit }
+  let(:journey_class) { double :journey_class, new: journey_double_no_entry}
 
   before {
-    @oyster_10 = Oystercard.new
+    @oyster_10 = Oystercard.new(journey_class)
     @oyster_10.add_money(10)
   }
 
@@ -34,8 +37,8 @@ describe Oystercard do
     end
 
     it 'has a blank instance of journey' do
-      card = described_class.new(journey)
-      expect(card.journey).to eq journey
+      card = described_class.new(journey_class)
+      expect(card.journey).to eq journey_double_no_entry
     end
 
   end
@@ -73,51 +76,35 @@ describe Oystercard do
   describe "#touch_in" do
 
     it 'can touch in' do
-      journeyClass = double :journeyClass
-      journey = double :journey, entry: entry_station
-      allow(journeyClass).to receive(:new).with(entry_station) { journey }
-      @oyster_10.touch_in(entry_station, journeyClass)
-      expect(@oyster_10.journey.entry).to eq(entry_station)
+      allow(journey_class).to receive(:new).with(entry_station) { journey_double_with_entry }
+      oyster = described_class.new(journey_class)
+      oyster.add_money(10)
+      oyster.touch_in(entry_station)
+      expect(oyster.journey.entry).to eq(entry_station)
     end
 
     it 'touch in raises error if below min balance' do
       expect { subject.touch_in(entry_station) }.to raise_error("not enough funds")
     end
 
-    it 'deducts penalty fare if you touch in twice' do
-      @oyster_10.touch_in(entry_station)
-      @oyster_10.touch_in(entry_station)
-      expect(@oyster_10.balance).to eq 10 - Journey::PENALTY_FARE
-    end
-
   end
 
   describe "#touch_out" do
 
-    xit 'can touch out' do
-      @oyster_10.touch_in(entry_station)
-      @oyster_10.touch_out(exit_station)
+    before {
+      allow(journey_class).to receive(:new).with(entry_station) { journey_double_with_entry }
+      @oyster = described_class.new(journey_class)
+      @oyster.add_money(10)
+      @oyster.touch_in(entry_station)
+      @oyster.touch_out(exit_station)
+    }
 
+    it 'can touch out' do
+      expect(@oyster.journey.exit).to eq(exit_station)
     end
 
-    # it "charges card on touch_out" do
-    #   @oyster_10.touch_in(station)
-    #   expect{@oyster_10.touch_out(exit_station)}.to change{@oyster_10.balance}.by(-Journey::MINIMUM_FARE)
-    # end
-
-    it 'deducts minimum fare at the end of a complete journey' do
-      @oyster_10.touch_in(entry_station)
-      @oyster_10.touch_out(exit_station)
-      expect(@oyster_10.balance).to eq 10 - Journey::MINIMUM_FARE
-    end
-
-    it 'deducts penalty fare if there is no entry station' do
-      @oyster_10.touch_out(exit_station)
-      expect(@oyster_10.balance).to eq 10 - Journey::PENALTY_FARE
-    end
-
-    xit 'records journey details' do
-
+    it 'records journey details' do
+      expect(@oyster.journeys).to include(journey_double_with_exit)
     end
 
   end

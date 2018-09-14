@@ -7,9 +7,10 @@ class Oystercard
 
   MAXIMUM_VALUE = 90
 
-  def initialize(journey = Journey.new)
+  def initialize(journey = Journey)
     @balance = 0
-    @journey = journey
+    @journeyClass = journey
+    @journey = journey.new
     @journeys = []
   end
 
@@ -20,14 +21,15 @@ class Oystercard
 
   end
 
-  def touch_in(station, journey = Journey)
+  def touch_in(station)
     raise "not enough funds" if @balance < Journey::MINIMUM_FARE
     deduct_money if @journey.entry
-    @journey = journey.new(station)
+    @journey = @journeyClass.new(station)
   end
 
   def touch_out(exit_station)
-    @journey.finish(exit_station)
+    @journey = @journey.finish(exit_station)
+    @journeys << @journey
     deduct_money
   end
 
